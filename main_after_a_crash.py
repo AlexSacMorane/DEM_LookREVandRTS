@@ -49,6 +49,13 @@ dict_sollicitations = dict_save['sollicitations']
 dict_tracker =dict_save['tracker']
 
 #-------------------------------------------------------------------------------
+#Prepare simulation
+#-------------------------------------------------------------------------------
+
+if Path('Debug/DEM_ite/PF_'+str(dict_algorithm['i_PF']+1)).exists():
+    shutil.rmtree('Debug/DEM_ite/PF_'+str(dict_algorithm['i_PF']+1))
+
+#-------------------------------------------------------------------------------
 #main
 #-------------------------------------------------------------------------------
 
