@@ -20,7 +20,6 @@ from pathlib import Path
 
 #Own function and class
 from Write_txt import Write_txt
-from Create_i_AC import Create_i_AC_local
 from Create_LG_IC import LG_tempo, From_LG_tempo_to_usable
 import Owntools
 import Grain
@@ -39,7 +38,7 @@ simulation_report = Report.Report('Debug/Report_after_crash',datetime.now())
 #load data
 #-------------------------------------------------------------------------------
 
-toload = open('Run_1_save_dicts','rb')
+toload = open('N_300_Run_1_save_dicts','rb')
 dict_save = pickle.load(toload,encoding = 'bytes')
 toload.close()
 dict_algorithm = dict_save['algorithm']
@@ -64,16 +63,10 @@ while not User.Criteria_StopSimulation(dict_algorithm):
       os.mkdir('Debug/DEM_ite/PF_'+str(dict_algorithm['i_PF'])+'/txt')
       os.mkdir('Debug/DEM_ite/PF_'+str(dict_algorithm['i_PF'])+'/png')
 
-      if dict_algorithm['MovePF_selector'] == 'Interpolation':
-          # Saving to compute a rigid body motion
-          L_center_g = []
-          for grain in dict_sample['L_g']:
-              L_center_g.append(grain.center.copy())
-
       # Compute kinetic energy criteria
       Ecin_stop = 0
       for grain in dict_sample['L_g']:
-          Ecin_stop = Ecin_stop + 0.5*grain.m*(dict_algorithm['Ecin_ratio']*grain.r_mean/dict_algorithm['dt_DEM'])**2/len(dict_sample['L_g'])
+          Ecin_stop = Ecin_stop + 0.5*grain.mass*(dict_algorithm['Ecin_ratio']*grain.radius/dict_algorithm['dt_DEM'])**2/len(dict_sample['L_g'])
 
       #Update element in dict
       dict_algorithm['Ecin_stop'] = Ecin_stop
@@ -105,29 +98,26 @@ while not User.Criteria_StopSimulation(dict_algorithm):
           # Detection of contacts between grains
           if dict_algorithm['i_DEM'] % dict_algorithm['i_update_neighborhoods']  == 0:
               Contact.Update_Neighborhoods(dict_algorithm,dict_sample)
-          Contact.Grains_Polyhedral_contact_Neighborhoods(dict_material,dict_sample)
+          Contact.Grains_Disks_contact_Neighborhoods(dict_material,dict_sample)
 
           # Detection of contacts between grain and walls
           if dict_algorithm['i_DEM'] % dict_algorithm['i_update_neighborhoods']  == 0:
               Contact_gw.Update_wall_Neighborhoods(dict_algorithm, dict_sample)
-          Contact_gw.Grains_Polyhedral_Wall_contact_Neighborhood(dict_material,dict_sample)
+          Contact_gw.Grains_Disk_Wall_contact_Neighborhood(dict_material,dict_sample)
 
           #Compute contact interactions (g-g and g-w)
           for contact in dict_sample['L_contact']:
               if dict_algorithm['Spring_type'] == 'Ponctual':
-                  contact.DEM_2grains_Polyhedral_normal()
-                  contact.DEM_2grains_Polyhedral_tangential(dict_algorithm['dt_DEM'])
-              elif dict_algorithm['Spring_type'] == 'Surface':
-                  contact.DEM_2grains_Polyhedral_normal_surface()
-                  contact.DEM_2grains_Polyhedral_tangential_surface(dict_algorithm['dt_DEM'])
+                  contact.normal()
+                  contact.tangential(dict_algorithm['dt_DEM'])
               else :
                   simulation_report.write('Spring type not available !')
                   raise ValueError('Spring type not available !')
           for contact in dict_sample['L_contact_gw'] :
               if dict_algorithm['Spring_type'] == 'Ponctual':
-                  contact.DEM_gw_Polyhedral_normal()
-                  contact.DEM_gw_Polyhedral_tangential(dict_algorithm['dt_DEM'])
-              else : #Surface must be coded for contact gw
+                  contact.normal()
+                  contact.tangential(dict_algorithm['dt_DEM'])
+              else :
                   simulation_report.write('Spring type not available !')
                   raise ValueError('Spring type not available !')
 
@@ -136,12 +126,12 @@ while not User.Criteria_StopSimulation(dict_algorithm):
           Ecin = 0
           Force_applied = 0
           for grain in dict_sample['L_g']:
-              a_i = grain.f/grain.m
+              a_i = grain.f/grain.mass
               v_i = grain.v + a_i*dict_algorithm['dt_DEM']
               dw_i = grain.mz/grain.inertia
               w_i = grain.w + dw_i*dict_algorithm['dt_DEM']
-              grain.update_geometry_kinetic(v_i,a_i,w_i,dict_algorithm['dt_DEM']) #Move grains
-              Ecin = Ecin + 0.5*grain.m*np.linalg.norm(grain.v)**2/len(dict_sample['L_g'])
+              grain.update_geometry_kinetic(v_i,a_i,dict_algorithm['dt_DEM']) #Move grains
+              Ecin = Ecin + 0.5*grain.mass*np.linalg.norm(grain.v)**2/len(dict_sample['L_g'])
               Force_applied = Force_applied + np.linalg.norm(grain.f)/len(dict_sample['L_g'])
 
           #Control the y_max to verify vertical confinement
@@ -218,19 +208,15 @@ while not User.Criteria_StopSimulation(dict_algorithm):
       simulation_report.tic_tempo(datetime.now())
 
       for grain in dict_sample['L_g']:
-          if grain.dissolved :
-              Create_i_AC_local(grain,dict_algorithm, dict_material, dict_sample,dict_sollicitations)
-              os.system('mpiexec -n '+str(dict_algorithm['np_proc'])+' ~/projects/moose/modules/combined/combined-opt -i PF_'+str(dict_algorithm['i_PF'])+'_g'+str(grain.id)+'.i')
-              j_str = Owntools.Sort_Files('PF_'+str(dict_algorithm['i_PF'])+'_g'+str(grain.id),dict_algorithm)
-              grain.PFtoDEM_Multi_local('Output/PF_'+str(dict_algorithm['i_PF'])+'_g'+str(grain.id)+'/PF_'+str(dict_algorithm['i_PF'])+'_g'+str(grain.id)+'_other_'+str(j_str),dict_algorithm)
-              grain.Geometricstudy_local(dict_geometry,dict_sample,simulation_report)
+          if grain.dissolvable :
+              Owntools.dissolve_grain(grain,dict_sollicitations)
 
       #Geometric study
       S_grains = 0
       S_grains_dissolvable = 0
       for grain in dict_sample['L_g']:
           S_grains = S_grains + grain.surface
-          if grain.dissolved :
+          if grain.dissolvable :
               S_grains_dissolvable = S_grains_dissolvable + grain.surface
       simulation_report.write('Total Surface '+str(int(S_grains))+' µm2\n')
       simulation_report.write('Total Surface dissolvable '+str(int(S_grains_dissolvable))+' µm2\n')
@@ -270,7 +256,7 @@ while not User.Criteria_StopSimulation(dict_algorithm):
 
       if dict_algorithm['SaveData'] :
         Owntools.save_tempo(dict_algorithm,dict_tracker)
-        Owntools.save_dicts(dict_algorithm, dict_geometry, dict_material, dict_sample, dict_sollicitations)
+        Owntools.save_dicts(dict_algorithm, dict_geometry, dict_material, dict_sample, dict_sollicitations, dict_tracker)
         shutil.copy('Debug/Report.txt','../'+dict_algorithm['main_folder_name']+'/Report_'+dict_algorithm['name_folder']+'_tempo.txt')
 
 #-------------------------------------------------------------------------------

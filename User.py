@@ -23,10 +23,10 @@ def All_parameters():
     #---------------------------------------------------------------------------
     #Geometric parameters
 
-    N_grain_disk = 30 #number of grains
+    N_grain_disk = 300 #number of grains
     R_mean = 350 #µm radius to compute the grain distribution. Then recomputed
-    L_R = [1.1*R_mean, 1*R_mean, 0.9*R_mean] #from larger to smaller
-    L_percentage_R = [1/3, 1/3, 1/3] #distribution of the different radius
+    L_R = [1.2*R_mean, 1.1*R_mean, 0.9*R_mean, 0.8*R_mean] #from larger to smaller
+    L_percentage_R = [1/6, 1/3, 1/3, 1/6] #distribution of the different radius
     #Recompute the mean radius
     R_mean = 0
     for i in range(len(L_R)):
@@ -82,25 +82,25 @@ def All_parameters():
 
     dt_DEM = dt_DEM_crit/8 #s time step during DEM simulation
     factor_neighborhood = 1.5 #margin to detect a grain into a neighborhood
-    i_update_neighborhoods = 100 #the frequency of the update of the neighborhood of the grains and the walls
+    i_update_neighborhoods = 200 #the frequency of the update of the neighborhood of the grains and the walls
     Spring_type = 'Ponctual' #Kind of contact
     #Stop criteria of the DEM
     i_DEM_stop = 3000 #maximum iteration for one DEM simulation
     Ecin_ratio = 0.0002
     n_window_stop = 50
-    dk0_stop = 0.05
+    dk0_stop = 0.03
     dy_box_max_stop = 0.5
 
     #PF-DEM
-    n_t_PFDEM = 3 #number of cycle PF-DEM
+    n_t_PFDEM = 15 #number of cycle PF-DEM
 
     #Debugging
     Debug = True #plot configuration before and after DEM simulation
     Debug_DEM = False #plot configuration inside DEM
     i_print_plot = 50 #frenquency of the print and plot (if Debug_DEM) in DEM step
-    SaveData = False #save simulation
-    main_folder_name = 'Data_MG_Box_AC_M' #where data are saved
-    template_simulation_name = 'Run_' #template of the simulation name
+    SaveData = True #save simulation
+    main_folder_name = 'Data_REV' #where data are saved
+    template_simulation_name = 'N_'+str(N_grain_disk)+'_Run_' #template of the simulation name
 
     #write dict
     dict_algorithm = {
@@ -132,7 +132,7 @@ def All_parameters():
     N_test_max = 5000 # maximum number of tries to generate a grain without overlap
     i_DEM_stop_IC = 3000 #stop criteria for DEM during IC
     Debug_DEM_IC = False #plot configuration inside DEM during IC
-    i_print_plot_IC = 100 #frenquency of the print and plot (if Debug_DEM_IC) for IC
+    i_print_plot_IC = 100 #frequency of the print and plot (if Debug_DEM_IC) for IC
     dt_DEM_IC = dt_DEM_crit/5 #s time step during IC
     Ecin_ratio_IC = 0.0005
     factor_neighborhood_IC = 1.5 #margin to detect a grain into a neighborhood
@@ -161,8 +161,8 @@ def All_parameters():
     Vertical_Confinement_Force = Vertical_Confinement_Pressure*(x_box_max-x_box_min)*(2*R_mean)*10**(-6) #µN
     gravity = 0 #µm/s2
     frac_dissolved = 0.15 #Percentage of grain dissolved
-    frac_Rmean0 = 0.02
-    DR_dissolution = frac_Rmean0*R_mean
+    frac_Rmean0 = 0.05
+    DR_dissolution = frac_Rmean0*R_mean #Reduction of the grain radius at eact iteration
 
     #write dict
     dict_sollicitations = {

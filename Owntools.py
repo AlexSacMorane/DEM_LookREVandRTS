@@ -445,6 +445,7 @@ def dissolve_grain(grain,dict_sollicitations):
     '''...'''
     grain.radius = grain.radius - dict_sollicitations['DR_dissolution']
     grain.Update_characteristic()
+    grain.plot_preparation()
 
 #-------------------------------------------------------------------------------
 

@@ -61,14 +61,6 @@ class Contact_gw:
 
 #-------------------------------------------------------------------------------
 
-  def update_overlap(self,new_overlap):
-    '''
-    update the overlap of a contact already created.
-    '''
-    self.overlap = new_overlap
-
-#-------------------------------------------------------------------------------
-
   def normal(self):
     '''compute the normal reaction of the contact
 
@@ -79,58 +71,70 @@ class Contact_gw:
         self.nwg = nwg
         overlap = self.limit-(self.g.center[1]-self.g.radius)
         self.overlap = overlap
-        Fwg_n = self.k*overlap**(3/2)
-        Fwg = Fwg_n*nwg
-        self.Fwg_n = Fwg_n
-        self.g.update_f(Fwg[0],Fwg[1])
-        #damping
-        Fwg_damp = -np.dot(self.g.v,nwg)*self.eta*nwg
-        self.Fwg_damp_n = np.linalg.norm(Fwg_damp)
-        self.g.update_f(Fwg_damp[0],Fwg_damp[1])
-
+        if overlap > 0 :
+            Fwg_n = self.k*overlap**(3/2)
+            Fwg = Fwg_n*nwg
+            self.Fwg_n = Fwg_n
+            self.g.update_f(Fwg[0],Fwg[1])
+            #damping
+            Fwg_damp = -np.dot(self.g.v,nwg)*self.eta*nwg
+            self.Fwg_damp_n = np.linalg.norm(Fwg_damp)
+            self.g.update_f(Fwg_damp[0],Fwg_damp[1])
+        else :
+            self.Fwg_n = 0
+            self.Fwg_damp_n = 0
     elif self.nature == 'gwy_max':
         #unlinear stiffness
         nwg = np.array([0,-1])
         self.nwg = nwg
         overlap = (self.g.center[1]+self.g.radius)-self.limit
         self.overlap = overlap
-        Fwg_n = self.k*overlap**(3/2)
-        Fwg = Fwg_n*nwg
-        self.Fwg_n = np.linalg.norm(Fwg_n)
-        self.g.update_f(Fwg[0],Fwg[1])
-        #damping
-        self.Fwg_damp_n = 0
-
+        if overlap > 0 :
+            Fwg_n = self.k*overlap**(3/2)
+            Fwg = Fwg_n*nwg
+            self.Fwg_n = np.linalg.norm(Fwg_n)
+            self.g.update_f(Fwg[0],Fwg[1])
+            #damping
+            self.Fwg_damp_n = 0
+        else :
+            self.Fwg_n = 0
+            self.Fwg_damp_n = 0
     elif self.nature == 'gwx_min':
         #unlinear stiffness
         nwg = np.array([1,0])
         self.nwg = nwg
         overlap = self.limit-(self.g.center[0]-self.g.radius)
         self.overlap = overlap
-        Fwg_n = self.k*overlap**(3/2)
-        Fwg = Fwg_n*nwg
-        self.Fwg_n = Fwg_n
-        self.g.update_f(Fwg[0],Fwg[1])
-        #damping
-        Fwg_damp = -np.dot(self.g.v,nwg)*self.eta*nwg
-        self.Fwg_damp_n = np.linalg.norm(Fwg_damp)
-        self.g.update_f(Fwg_damp[0],Fwg_damp[1])
-
+        if overlap > 0:
+            Fwg_n = self.k*overlap**(3/2)
+            Fwg = Fwg_n*nwg
+            self.Fwg_n = Fwg_n
+            self.g.update_f(Fwg[0],Fwg[1])
+            #damping
+            Fwg_damp = -np.dot(self.g.v,nwg)*self.eta*nwg
+            self.Fwg_damp_n = np.linalg.norm(Fwg_damp)
+            self.g.update_f(Fwg_damp[0],Fwg_damp[1])
+        else :
+            self.Fwg_n = 0
+            self.Fwg_damp_n = 0
     elif self.nature == 'gwx_max':
         #linear stiffness
         nwg = np.array([-1,0])
         self.nwg = nwg
         overlap = self.g.center[0]+self.g.radius-self.limit
         self.overlap = overlap
-        Fwg_n = self.k*overlap**(3/2)
-        Fwg = Fwg_n*nwg
-        self.Fwg_n = Fwg_n
-        self.g.update_f(Fwg[0],Fwg[1])
-        #damping
-        Fwg_damp = -np.dot(self.g.v,nwg)*self.eta*nwg
-        self.Fwg_damp_n = np.linalg.norm(Fwg_damp)
-        self.g.update_f(Fwg_damp[0],Fwg_damp[1])
-
+        if overlap > 0:
+            Fwg_n = self.k*overlap**(3/2)
+            Fwg = Fwg_n*nwg
+            self.Fwg_n = Fwg_n
+            self.g.update_f(Fwg[0],Fwg[1])
+            #damping
+            Fwg_damp = -np.dot(self.g.v,nwg)*self.eta*nwg
+            self.Fwg_damp_n = np.linalg.norm(Fwg_damp)
+            self.g.update_f(Fwg_damp[0],Fwg_damp[1])
+        else :
+            self.Fwg_n = 0
+            self.Fwg_damp_n = 0       
 #-------------------------------------------------------------------------------
 
   def tangential(self, dt_DEM):
