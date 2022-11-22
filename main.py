@@ -356,9 +356,6 @@ simulation_report.end(datetime.now())
 
 if dict_algorithm['Debug'] :
 
-    #Making movies
-    Owntools.make_mp4()
-
     #Trackers
     Owntools.Debug_Trackers(dict_tracker)
 
