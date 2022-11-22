@@ -23,7 +23,6 @@ import pickle
 from pathlib import Path
 from datetime import datetime
 import random
-import imageio
 import Contact
 import Contact_gw
 import Grain
