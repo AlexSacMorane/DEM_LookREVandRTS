@@ -75,6 +75,27 @@ def All_parameters():
     }
 
     #---------------------------------------------------------------------------
+    #External sollicitations
+    
+    #Confinement
+    Vertical_Confinement_Linear_Force = Y*2*R_mean/1000 #µN/µm used to compute the Vertical_Confinement_Force
+    Vertical_Confinement_Force = Vertical_Confinement_Linear_Force*(x_box_max-x_box_min) #µN
+    gravity = 0 #µm/s2
+    
+    #Dissolution
+    frac_dissolved = 0.15 #Percentage of grain dissolved
+    frac_Rmean0 = 0.05
+    DR_dissolution = frac_Rmean0*R_mean #Reduction of the grain radius at eact iteration
+
+    #write dict
+    dict_sollicitations = {
+    'Vertical_Confinement_Force' : Vertical_Confinement_Force,
+    'gravity' : gravity,
+    'frac_dissolved' : frac_dissolved,
+    'DR_dissolution' : DR_dissolution
+    }
+
+    #---------------------------------------------------------------------------
     #Algorithm parameters
 
     #DEM parameters
@@ -95,12 +116,12 @@ def All_parameters():
     n_t_PFDEM = 20 #number of cycle PF-DEM
 
     #Debugging
-    i_print_plot = 50 #frenquency of the print and plot (if Debug_DEM) in DEM step
+    i_print_plot = 100 #frenquency of the print and plot (if Debug_DEM) in DEM step
     Debug = True #plot configuration before and after DEM simulation
     Debug_DEM = False #plot configuration inside DEM
     SaveData = True #save simulation
-    main_folder_name = 'Data_REV' #where data are saved
-    template_simulation_name = 'N_'+str(N_grain_disk)+'_Run_' #template of the simulation name
+    main_folder_name = 'Data_RTS' #where data are saved
+    template_simulation_name = 'f_'+str(int(1000*frac_Rmean0))+'_Run_' #template of the simulation name
 
     #write dict
     dict_algorithm = {
@@ -158,27 +179,6 @@ def All_parameters():
     'i_print_plot_IC' : i_print_plot_IC,
     'factor_neighborhood_IC' : factor_neighborhood_IC,
     'N_test_max' : N_test_max
-    }
-
-    #---------------------------------------------------------------------------
-    #External sollicitations
-    
-    #Confinement
-    Vertical_Confinement_Linear_Force = Y*2*R_mean/1000 #µN/µm used to compute the Vertical_Confinement_Force
-    Vertical_Confinement_Force = Vertical_Confinement_Linear_Force*(x_box_max-x_box_min) #µN
-    gravity = 0 #µm/s2
-    
-    #Dissolution
-    frac_dissolved = 0.15 #Percentage of grain dissolved
-    frac_Rmean0 = 0.02
-    DR_dissolution = frac_Rmean0*R_mean #Reduction of the grain radius at eact iteration
-
-    #write dict
-    dict_sollicitations = {
-    'Vertical_Confinement_Force' : Vertical_Confinement_Force,
-    'gravity' : gravity,
-    'frac_dissolved' : frac_dissolved,
-    'DR_dissolution' : DR_dissolution
     }
 
     #---------------------------------------------------------------------------

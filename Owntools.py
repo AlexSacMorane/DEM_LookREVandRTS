@@ -443,7 +443,7 @@ def Compute_k0(dict_sample,dict_sollicitations):
 
 def dissolve_grain(grain,dict_sollicitations):
     '''...'''
-    grain.radius = grain.radius - dict_sollicitations['DR_dissolution']
+    grain.radius = max(grain.radius - dict_sollicitations['DR_dissolution'], dict_sollicitations['DR_dissolution'])
     grain.Update_characteristic()
     grain.plot_preparation()
 
